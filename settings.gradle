@@ -1,0 +1,5 @@
+rootProject.name = 'hospital-waiting-list'
+
+include 'hospital-waiting-list-model'
+include 'hospital-waiting-list-business'
+include 'hospital-waiting-list-web'

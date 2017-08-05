@@ -1,0 +1,92 @@
+buildscript {
+    repositories { mavenCentral() }
+}
+
+ext {
+    springBootVersion = '1.5.6.RELEASE'
+    jdkVersion = 1.8
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'checkstyle'
+    apply plugin: 'pmd'
+    apply plugin: 'findbugs'
+    apply plugin: 'jacoco'
+
+    sourceCompatibility = jdkVersion
+    targetCompatibility = jdkVersion
+    springBootVersion = springBootVersion
+    compileJava.options.encoding = 'UTF-8'
+
+    group = 'ie.oki'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+
+    checkstyle {
+        toolVersion = "8.1"
+        configFile = file("$rootDir/config/checkstyle.xml")
+        sourceSets = [sourceSets.main]
+    }
+
+    pmd {
+        ruleSetFiles = files("$rootDir/config/pmd-ruleset.xml")
+        sourceSets = [sourceSets.main]
+    }
+
+    findbugs {
+        effort = "max"
+        reportLevel = "high"
+        sourceSets = [sourceSets.main]
+    }
+
+    tasks.withType(FindBugs) {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
+
+    dependencies {
+        compile('org.projectlombok:lombok:1.16.18')
+        compile('org.springframework.boot:spring-boot-starter')
+        compile('org.springframework.boot:spring-boot-devtools')
+        testCompile('org.easymock:easymock:3.4')
+        testCompile('org.powermock:powermock-api-mockito:1.6.6')
+        testCompile('org.powermock:powermock-module-junit4:1.6.6')
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0.2'
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        csv.enabled = false
+    }
+}
+
+codeCoverageReport.dependsOn {
+    subprojects*.test
+}

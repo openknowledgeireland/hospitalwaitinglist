@@ -1,0 +1,17 @@
+buildscript {
+    repositories { mavenCentral() }
+}
+
+plugins { id "io.spring.dependency-management" version "1.0.0.RELEASE" }
+
+jar {
+    baseName = 'hospital-waiting-list-business'
+}
+
+dependencies {
+    compile project(':hospital-waiting-list-model')
+}
+
+dependencyManagement {
+    imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}") }
+}
