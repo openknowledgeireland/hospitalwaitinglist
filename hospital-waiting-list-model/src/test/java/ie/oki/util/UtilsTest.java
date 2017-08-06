@@ -3,6 +3,7 @@ package ie.oki.util;
 import org.junit.Test;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -140,5 +141,79 @@ public class UtilsTest {
     @Test(expected = NullPointerException.class)
     public void testConvertStringToDate_nullInput() {
         Utils.convertStringToDate(null);
+    }
+
+    @Test
+    public void testNormalizeAndTrimList_nullInput() {
+        List<String> result = Utils.normalizeAndTrimList(null);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testNormalizeAndTrimList_emptyInput() {
+        List<String> result = Utils.normalizeAndTrimList(new ArrayList<>());
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testNormalizeAndTrimList_nullItemInList() {
+        List<String> input = new ArrayList<>();
+        input.add(null);
+        input.add(" \" test a  aa \"  ");
+
+        List<String> result = Utils.normalizeAndTrimList(input);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertNull(result.get(0));
+        assertEquals("test a  aa", result.get(1));
+    }
+
+    @Test
+    public void testNormalizeAndTrimList_notNullItemsInList() {
+        List<String> input = new ArrayList<>();
+        input.add("test2");
+        input.add(" \" test a  aa \"  ");
+
+        List<String> result = Utils.normalizeAndTrimList(input);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("test2", result.get(0));
+        assertEquals("test a  aa", result.get(1));
+    }
+
+    @Test
+    public void testNormalizeAndTrim_nullInput() {
+        String result = Utils.normalizeAndTrim(null);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testNormalizeAndTrim_blankInput() {
+        String result = Utils.normalizeAndTrim("");
+
+        assertNotNull(result);
+        assertEquals("", result);
+    }
+
+    @Test
+    public void testNormalizeAndTrim_withoutQuotation() {
+        String result = Utils.normalizeAndTrim("     test ");
+
+        assertNotNull(result);
+        assertEquals("test", result);
+    }
+
+    @Test
+    public void testNormalizeAndTrim_withQuotation() {
+        String result = Utils.normalizeAndTrim("  \"   \"test \"   ");
+
+        assertNotNull(result);
+        assertEquals("test", result);
     }
 }

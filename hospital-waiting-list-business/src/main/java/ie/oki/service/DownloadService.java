@@ -1,5 +1,7 @@
 package ie.oki.service;
 
+import ie.oki.model.UriComponents;
+
 import java.io.InputStream;
 import java.net.URI;
 
@@ -9,14 +11,12 @@ import java.net.URI;
 public interface DownloadService {
 
     /**
-     * Downloads a file using the defined protocol, host and path.
+     * Downloads a file using the parameters within the {@link UriComponents}.
      * <p>Rather than passing the full url to the function, the details are separated
      * so the {@link URI} can parse the special characters in the path properly.</p>
      *
-     * @param protocol user either {@code http} or {@code https}
-     * @param host the domain of the url, for example: {@code www.example.org}
-     * @param path the url of the downloadable file
+     * @param uriComponents component that has all the details to download a file
      * @return null or an {@link InputStream} based on whether the download was successful or not
      */
-    InputStream downloadFile(final String protocol, final String host, final String path);
+    InputStream downloadFile(final UriComponents uriComponents);
 }

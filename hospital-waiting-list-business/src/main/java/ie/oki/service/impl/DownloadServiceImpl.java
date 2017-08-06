@@ -1,5 +1,6 @@
 package ie.oki.service.impl;
 
+import ie.oki.model.UriComponents;
 import ie.oki.service.DownloadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,15 @@ import java.net.URISyntaxException;
 public class DownloadServiceImpl implements DownloadService {
 
     @Override
-    public InputStream downloadFile(final String protocol, final String host, final String path) {
+    public InputStream downloadFile(final UriComponents uriComponents) {
         try {
-            URI uri = new URI(protocol, host, path, null);
+            URI uri = new URI(uriComponents.getScheme(), uriComponents.getHost(), uriComponents.getPath(), null);
             return uri.toURL().openStream();
         } catch (IOException | URISyntaxException exc) {
             if (log.isInfoEnabled()) {
-                log.info("Couldn't download the file. Input parameters: protocol[" + protocol + "]; host[" + host + "]; path[" + path + "].", exc);
+                log.info("Couldn't download the file. Input parameters:"
+                    + "protocol[" + uriComponents.getScheme() + "]; host[" + uriComponents.getHost() + "]; "
+                    + "path[" + uriComponents.getPath() + "].", exc);
             }
         }
         return null;

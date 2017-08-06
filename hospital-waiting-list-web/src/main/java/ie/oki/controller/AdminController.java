@@ -1,13 +1,12 @@
 package ie.oki.controller;
 
 import ie.oki.enums.CsvType;
+import ie.oki.model.UriComponents;
 import ie.oki.service.CommonService;
 import ie.oki.service.DownloadService;
 import ie.oki.service.ProcessFileService;
-import ie.oki.util.Constants;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -36,18 +35,6 @@ public class AdminController {
     @Autowired
     private ProcessFileService processFileService;
 
-    @Value("${app.config.csv.host}")
-    private String host;
-
-    @Value("${app.config.csv.base-url}")
-    private String baseUrl;
-
-    @Value("${app.config.csv.OPFileName}")
-    private String opFileName;
-
-    @Value("${app.config.csv.IPDCFileName}")
-    private String ipdcFileName;
-
     @Autowired
     private CommonService commonService;
 
@@ -74,17 +61,9 @@ public class AdminController {
                 messageSource.getMessage("error.admin.yearToBeGreaterThan2014", null, LocaleContextHolder.getLocale()));
         }
 
-        String url = baseUrl;
+        UriComponents uriComponents = commonService.constructUriComponents(type, year);
 
-        if (CsvType.OP.equals(type)) {
-            url += opFileName;
-        } else {
-            url += ipdcFileName;
-        }
-
-        url += " " + Integer.toString(year) + "." + Constants.EXTENSION_CSV;
-
-        InputStream inputStream = downloadService.downloadFile(Constants.PROTOCOL_HTTP, host, url);
+        InputStream inputStream = downloadService.downloadFile(uriComponents);
 
         if (inputStream == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

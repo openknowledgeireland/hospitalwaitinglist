@@ -1,6 +1,7 @@
 package ie.oki.controller;
 
 import ie.oki.enums.CsvType;
+import ie.oki.model.UriComponents;
 import ie.oki.service.CommonService;
 import ie.oki.service.DownloadService;
 import ie.oki.service.ProcessFileService;
@@ -23,7 +24,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,9 +55,9 @@ public class AdminControllerTest {
     private CsvType csvType;
     private String errorYear2014 = "yearToBeGreaterThan2014";
     private String errorCannotDownloadFile = "cannotDownloadFile";
-    private String constructedFileName = "nullnull 2014.csv";
     private String messageSuccess = "SUCCESS";
     private InputStream inputStream;
+    private UriComponents uriComponents;
 
     @Before
     public void setup() {
@@ -67,6 +67,8 @@ public class AdminControllerTest {
         year = 2014;
         csvType = CsvType.OP;
         inputStream = Mockito.mock(InputStream.class);
+
+        uriComponents = new UriComponents();
     }
 
     @Test
@@ -98,7 +100,8 @@ public class AdminControllerTest {
     @Test
     public void testUpdate_cannotDownloadFile() throws Exception {
 
-        when(downloadService.downloadFile(anyString(), anyString(), eq(constructedFileName))).thenReturn(null);
+        when(commonService.constructUriComponents(csvType, year)).thenReturn(uriComponents);
+        when(downloadService.downloadFile(uriComponents)).thenReturn(null);
         when(messageSource.getMessage(anyString(), anyObject(), any(Locale.class))).thenReturn(errorCannotDownloadFile);
 
         MvcResult result = mockMvc.perform(get("/admin/update?year=" + year + "&type=" + csvType).contentType(MediaType.APPLICATION_JSON))
@@ -109,14 +112,16 @@ public class AdminControllerTest {
 
         assertEquals(errorCannotDownloadFile, content);
 
-        verify(downloadService).downloadFile(anyString(), anyString(), eq(constructedFileName));
+        verify(commonService).constructUriComponents(csvType, year);
+        verify(downloadService).downloadFile(uriComponents);
         verify(messageSource).getMessage(anyString(), anyObject(), any(Locale.class));
     }
 
     @Test
     public void testUpdate_opDownloadSuccessful() throws Exception {
 
-        when(downloadService.downloadFile(anyString(), anyString(), eq(constructedFileName))).thenReturn(inputStream);
+        when(commonService.constructUriComponents(csvType, year)).thenReturn(uriComponents);
+        when(downloadService.downloadFile(uriComponents)).thenReturn(inputStream);
         doNothing().when(processFileService).readFile(inputStream, csvType);
 
         MvcResult result = mockMvc.perform(get("/admin/update?year=" + year + "&type=" + csvType).contentType(MediaType.APPLICATION_JSON))
@@ -127,7 +132,8 @@ public class AdminControllerTest {
 
         assertEquals(messageSuccess, content);
 
-        verify(downloadService).downloadFile(anyString(), anyString(), eq(constructedFileName));
+        verify(commonService).constructUriComponents(csvType, year);
+        verify(downloadService).downloadFile(uriComponents);
         verify(processFileService).readFile(inputStream, csvType);
     }
 
@@ -136,7 +142,8 @@ public class AdminControllerTest {
 
         csvType = CsvType.IPDC;
 
-        when(downloadService.downloadFile(anyString(), anyString(), eq(constructedFileName))).thenReturn(inputStream);
+        when(commonService.constructUriComponents(csvType, year)).thenReturn(uriComponents);
+        when(downloadService.downloadFile(uriComponents)).thenReturn(inputStream);
         doNothing().when(processFileService).readFile(inputStream, csvType);
 
         MvcResult result = mockMvc.perform(get("/admin/update?year=" + year + "&type=" + csvType).contentType(MediaType.APPLICATION_JSON))
@@ -147,7 +154,8 @@ public class AdminControllerTest {
 
         assertEquals(messageSuccess, content);
 
-        verify(downloadService).downloadFile(anyString(), anyString(), eq(constructedFileName));
+        verify(commonService).constructUriComponents(csvType, year);
+        verify(downloadService).downloadFile(uriComponents);
         verify(processFileService).readFile(inputStream, csvType);
     }
 

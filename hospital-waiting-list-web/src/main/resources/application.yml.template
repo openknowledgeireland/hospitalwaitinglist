@@ -9,6 +9,8 @@ app:
       base-url: /home/OpenData/
       OPFileName: OP Waiting List By Group Hospital
       IPDCFileName: IPDC Waiting List By Group Hospital
+    autoDownload:
+      cron: 0 0 3 * * *
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/database

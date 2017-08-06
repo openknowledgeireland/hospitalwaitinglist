@@ -1,5 +1,8 @@
 package ie.oki.service.impl;
 
+import ie.oki.enums.CsvType;
+import ie.oki.model.UriComponents;
+import ie.oki.util.Constants;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -12,6 +15,7 @@ import org.springframework.cache.CacheManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +35,11 @@ public class CommonServiceImplTest {
     private String cacheName;
     private Cache cache;
 
+    private String baseUrl;
+    private String host;
+    private String opFileName;
+    private String ipdcFileName;
+
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
@@ -43,6 +52,11 @@ public class CommonServiceImplTest {
         realCacheNames = new ArrayList<>();
 
         realCacheNames.add(cacheName);
+
+        baseUrl = "baseUrl";
+        host = "host";
+        opFileName = "opFileName";
+        ipdcFileName = "ipdcFileName";
     }
 
     @Test
@@ -55,5 +69,37 @@ public class CommonServiceImplTest {
 
         verify(cacheManager).getCache(cacheName);
         verify(cache).clear();
+    }
+
+    @Test
+    public void testConstructUriComponent_op2014() {
+        commonServiceImpl.setHost(host);
+        commonServiceImpl.setBaseUrl(baseUrl);
+        commonServiceImpl.setOpFileName(opFileName);
+        commonServiceImpl.setIpdcFileName(ipdcFileName);
+
+        UriComponents result = commonServiceImpl.constructUriComponents(CsvType.OP, 2014);
+
+        String expectedBaseUrl = baseUrl + opFileName + " 2014." + Constants.EXTENSION_CSV;
+
+        assertEquals(Constants.PROTOCOL_HTTP, result.getScheme());
+        assertEquals(host, result.getHost());
+        assertEquals(expectedBaseUrl, result.getPath());
+    }
+
+    @Test
+    public void testConstructUriComponent_ipdc2014() {
+        commonServiceImpl.setHost(host);
+        commonServiceImpl.setBaseUrl(baseUrl);
+        commonServiceImpl.setOpFileName(opFileName);
+        commonServiceImpl.setIpdcFileName(ipdcFileName);
+
+        UriComponents result = commonServiceImpl.constructUriComponents(CsvType.IPDC, 2014);
+
+        String expectedBaseUrl = baseUrl + ipdcFileName + " 2014." + Constants.EXTENSION_CSV;
+
+        assertEquals(Constants.PROTOCOL_HTTP, result.getScheme());
+        assertEquals(host, result.getHost());
+        assertEquals(expectedBaseUrl, result.getPath());
     }
 }

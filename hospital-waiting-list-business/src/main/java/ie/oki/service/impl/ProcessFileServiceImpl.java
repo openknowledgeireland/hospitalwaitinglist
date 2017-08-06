@@ -80,6 +80,8 @@ public class ProcessFileServiceImpl implements ProcessFileService {
 
         List<String> csvRow = Arrays.asList(line.split(Constants.COMMA));
 
+        csvRow = Utils.normalizeAndTrimList(csvRow);
+
         if (csvRow.size() != LIST_SIZE_OP) {
             if (log.isInfoEnabled()) {
                 log.info("The number of columns while processing the line[" + csvRow + "] is not " + LIST_SIZE_OP + ". Aborting the function.");
@@ -125,6 +127,8 @@ public class ProcessFileServiceImpl implements ProcessFileService {
         Record record = new Record();
 
         List<String> csvRow = Arrays.asList(line.split(Constants.COMMA));
+
+        csvRow = Utils.normalizeAndTrimList(csvRow);
 
         if (csvRow.size() != LIST_SIZE_IPDC) {
             if (log.isInfoEnabled()) {

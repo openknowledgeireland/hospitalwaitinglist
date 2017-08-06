@@ -1,5 +1,6 @@
 package ie.oki.service.impl;
 
+import ie.oki.model.UriComponents;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ public class DownloadServiceImplTest {
     private URI uri;
     private URL url;
     private InputStream inputStream;
+    private UriComponents uriComponents;
     private String protocol;
     private String host;
     private String path;
@@ -44,6 +46,11 @@ public class DownloadServiceImplTest {
         protocol = "http";
         host = "host";
         path = "/path";
+
+        uriComponents = new UriComponents();
+        uriComponents.setScheme(protocol);
+        uriComponents.setHost(host);
+        uriComponents.setPath(path);
     }
 
     @Test
@@ -55,7 +62,7 @@ public class DownloadServiceImplTest {
         when(uri.toURL()).thenReturn(url);
         when(url.openStream()).thenReturn(inputStream);
 
-        InputStream result = downloadServiceImpl.downloadFile(protocol, host, path);
+        InputStream result = downloadServiceImpl.downloadFile(uriComponents);
 
         assertNotNull(result);
 
@@ -72,7 +79,7 @@ public class DownloadServiceImplTest {
         when(uri.toURL()).thenReturn(url);
         when(url.openStream()).thenThrow(IOException.class);
 
-        InputStream result = downloadServiceImpl.downloadFile(protocol, host, path);
+        InputStream result = downloadServiceImpl.downloadFile(uriComponents);
 
         assertNull(result);
 
@@ -89,7 +96,7 @@ public class DownloadServiceImplTest {
         when(uri.toURL()).thenReturn(url);
         when(url.openStream()).thenThrow(URISyntaxException.class);
 
-        InputStream result = downloadServiceImpl.downloadFile(protocol, host, path);
+        InputStream result = downloadServiceImpl.downloadFile(uriComponents);
 
         assertNull(result);
 
