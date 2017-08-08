@@ -31,7 +31,7 @@ The recommended minimum Java version is 1.8.0_144
 
 To build it on windows run the `gradlew clean build` in the `hospital-waiting-list` folder, which will build all three projects (model, business, web).
 
-On linux you have to set the execution flag on the gradlew file first, otherwise you get a permission denied error. To do that, run: `chmod +x gradlew`
+On linux you might have to set the execution flag on the gradlew file first, otherwise you get a permission denied error. To do that, run: `chmod +x gradlew`
 
 Once the project is built, navigate to `hospital-waiting-list-web/build/libs/` and run:
 
