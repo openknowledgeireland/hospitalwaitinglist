@@ -1,17 +1,21 @@
+app-config:
+  auto-download:
+    cron: 0 0 3 * * *
+  csv:
+    host: www.ntpf.ie
+    base-url: /home/OpenData/
+    op-file-name: OP Waiting List By Group Hospital
+    ipdc-file-name: IPDC Waiting List By Group Hospital
 logging:
   file: hospital-waiting-list.log
 server:
   contextPath: /hospital-waiting-list
-app:
-  config:
-    csv:
-      host: www.ntpf.ie
-      base-url: /home/OpenData/
-      OPFileName: OP Waiting List By Group Hospital
-      IPDCFileName: IPDC Waiting List By Group Hospital
-    autoDownload:
-      cron: 0 0 3 * * *
 spring:
+  cache:
+    caffeine:
+      spec: expireAfterAccess=300s
+  database:
+    driverClassName: org.postgresql.Driver
   datasource:
     url: jdbc:postgresql://localhost:5432/database
     username: postgres
@@ -19,8 +23,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-  database:
-    driverClassName: org.postgresql.Driver
-  cache:
-    caffeine:
-      spec: expireAfterAccess=300s

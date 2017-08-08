@@ -17,6 +17,7 @@
     <rule ref="rulesets/java/naming.xml">
         <exclude name="LongVariable" />
         <exclude name="ShortVariable" />
+        <exclude name="ShortClassName" />
     </rule>
     <rule ref="rulesets/java/strings.xml" />
     <rule ref="rulesets/java/typeresolution.xml" />

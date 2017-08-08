@@ -1,18 +1,30 @@
 buildscript {
-    repositories { mavenCentral() }
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/plugins-release" }
+    }
+    dependencies {
+        classpath "io.spring.gradle:propdeps-plugin:0.0.9.RELEASE"
+    }
 }
 
 plugins { id "io.spring.dependency-management" version "1.0.0.RELEASE" }
 
+apply plugin: "propdeps"
+apply plugin: "propdeps-idea"
+
 jar {
-    baseName = 'hospital-waiting-list-model'
+    baseName = "hospital-waiting-list-model"
 }
 
 dependencies {
-    compile('io.springfox:springfox-swagger2:2.7.0')
-    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile("io.springfox:springfox-swagger2:2.7.0")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    optional "org.springframework.boot:spring-boot-configuration-processor"
 }
 
 dependencyManagement {
     imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}") }
 }
+
+compileJava.dependsOn(processResources)

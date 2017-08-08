@@ -27,7 +27,7 @@ Update these parameters to suit your needs:
 
 ### Building the project ###
 
-The recommended minimum Java version is 1.8.0_92
+The recommended minimum Java version is 1.8.0_144
 
 To build it on windows run the `gradlew clean build` in the `hospital-waiting-list` folder, which will build all three projects (model, business, web).
 

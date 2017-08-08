@@ -2,6 +2,7 @@ package ie.oki.service.impl;
 
 import ie.oki.enums.CsvType;
 import ie.oki.model.UriComponents;
+import ie.oki.properties.AppProperties;
 import ie.oki.util.Constants;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Zoltan Toth
@@ -26,6 +26,12 @@ public class CommonServiceImplTest {
 
     @Mock
     private CacheManager cacheManager;
+
+    @Mock
+    private AppProperties appProperties;
+
+    @Mock
+    private AppProperties.Csv csv;
 
     @InjectMocks
     private CommonServiceImpl commonServiceImpl;
@@ -73,10 +79,11 @@ public class CommonServiceImplTest {
 
     @Test
     public void testConstructUriComponent_op2014() {
-        commonServiceImpl.setHost(host);
-        commonServiceImpl.setBaseUrl(baseUrl);
-        commonServiceImpl.setOpFileName(opFileName);
-        commonServiceImpl.setIpdcFileName(ipdcFileName);
+        doReturn(csv).when(appProperties).getCsv();
+        doReturn(host).when(csv).getHost();
+        doReturn(baseUrl).when(csv).getBaseUrl();
+        doReturn(opFileName).when(csv).getOpFileName();
+        doReturn(ipdcFileName).when(csv).getIpdcFileName();
 
         UriComponents result = commonServiceImpl.constructUriComponents(CsvType.OP, 2014);
 
@@ -85,14 +92,22 @@ public class CommonServiceImplTest {
         assertEquals(Constants.PROTOCOL_HTTP, result.getScheme());
         assertEquals(host, result.getHost());
         assertEquals(expectedBaseUrl, result.getPath());
+
+        verify(appProperties, times(3)).getCsv();
+        verify(csv).getHost();
+        verify(csv).getBaseUrl();
+        verify(csv).getOpFileName();
+
+        verifyNoMoreInteractions(appProperties);
+        verifyNoMoreInteractions(csv);
     }
 
     @Test
     public void testConstructUriComponent_ipdc2014() {
-        commonServiceImpl.setHost(host);
-        commonServiceImpl.setBaseUrl(baseUrl);
-        commonServiceImpl.setOpFileName(opFileName);
-        commonServiceImpl.setIpdcFileName(ipdcFileName);
+        doReturn(csv).when(appProperties).getCsv();
+        doReturn(host).when(csv).getHost();
+        doReturn(baseUrl).when(csv).getBaseUrl();
+        doReturn(ipdcFileName).when(csv).getIpdcFileName();
 
         UriComponents result = commonServiceImpl.constructUriComponents(CsvType.IPDC, 2014);
 
@@ -101,5 +116,13 @@ public class CommonServiceImplTest {
         assertEquals(Constants.PROTOCOL_HTTP, result.getScheme());
         assertEquals(host, result.getHost());
         assertEquals(expectedBaseUrl, result.getPath());
+
+        verify(appProperties, times(3)).getCsv();
+        verify(csv).getHost();
+        verify(csv).getBaseUrl();
+        verify(csv).getIpdcFileName();
+
+        verifyNoMoreInteractions(appProperties);
+        verifyNoMoreInteractions(csv);
     }
 }

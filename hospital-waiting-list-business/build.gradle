@@ -5,11 +5,11 @@ buildscript {
 plugins { id "io.spring.dependency-management" version "1.0.0.RELEASE" }
 
 jar {
-    baseName = 'hospital-waiting-list-business'
+    baseName = "hospital-waiting-list-business"
 }
 
 dependencies {
-    compile project(':hospital-waiting-list-model')
+    compile project(":hospital-waiting-list-model")
 }
 
 dependencyManagement {

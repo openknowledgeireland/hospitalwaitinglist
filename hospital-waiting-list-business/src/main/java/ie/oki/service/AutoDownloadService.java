@@ -6,9 +6,9 @@ package ie.oki.service;
 public interface AutoDownloadService {
 
     /**
-     * Automatically downloads the CSV files from the data.gov.ie site for the current year
-     * and checks if all the entries were already processed.
-     * If so, then they will be skipped, otherwise they will be inserted to the database.
+     * Downloads the CSV files from the data.gov.ie for the current year
+     * and checks if they already exists there.
+     * If don't then the entries will be inserted to the database.
      */
     void checkFiles();
 }
