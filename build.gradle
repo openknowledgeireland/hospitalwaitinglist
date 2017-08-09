@@ -1,5 +1,5 @@
 buildscript {
-    repositories { mavenCentral() }
+    repositories { jcenter() }
 }
 
 ext {
@@ -9,6 +9,7 @@ ext {
 
 subprojects {
     apply plugin: "java"
+    apply plugin: 'idea'
     apply plugin: "checkstyle"
     apply plugin: "pmd"
     apply plugin: "findbugs"
@@ -23,7 +24,7 @@ subprojects {
     version = "0.0.1-SNAPSHOT"
 
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     checkstyle {
@@ -53,8 +54,9 @@ subprojects {
     jacocoTestReport {
         reports {
             xml.enabled = true
-            xml.destination file("${buildDir}/reports/jacoco/report.xml")
-            html.enabled = false
+            xml.destination file("${buildDir}/reports/jacoco/xml/report.xml")
+            html.enabled = true
+            html.destination file("${buildDir}/reports/jacoco/html")
         }
     }
 
@@ -89,6 +91,6 @@ task codeCoverageReport(type: JacocoReport) {
     }
 }
 
-codeCoverageReport.dependsOn {
+codeCoverageReport.dependsOn << {
     subprojects*.test
 }

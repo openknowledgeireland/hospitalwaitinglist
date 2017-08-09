@@ -25,6 +25,10 @@ Update these parameters to suit your needs:
     password: password
 ```
 
+### Development ###
+
+In case you want to open the project in the IntelliJ IDEA, first run: `gradlew cleanIdea idea`. That will create the necessary files for the IDE.
+
 ### Building the project ###
 
 The recommended minimum Java version is 1.8.0_144
@@ -47,4 +51,4 @@ You can either check out the controllers, or once the application is up and runn
 
 To check the code coverage run the command: `gradlew test jacocoTestReport` or if you already ran the tests, then the `test` can be left out from the command.
 
-You can find the output file in `${buildDir}/reports/jacoco/test/html/index.html` for each projects.
+You can find the html output file in `${buildDir}/reports/jacoco/html/index.html` and the xml file in `${buildDir}/reports/jacoco/xml/resport.xml` for each projects.
