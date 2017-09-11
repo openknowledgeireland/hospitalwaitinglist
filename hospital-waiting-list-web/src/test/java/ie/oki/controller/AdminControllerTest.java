@@ -7,10 +7,10 @@ import ie.oki.service.DownloadService;
 import ie.oki.service.ProcessFileService;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AdminControllerTest {
 
     @Mock
@@ -56,17 +57,17 @@ public class AdminControllerTest {
     private String errorYear2014 = "yearToBeGreaterThan2014";
     private String errorCannotDownloadFile = "cannotDownloadFile";
     private String messageSuccess = "SUCCESS";
+
+    @Mock
     private InputStream inputStream;
     private UriComponents uriComponents;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mockMvc = standaloneSetup(adminController).build();
 
         year = 2014;
         csvType = CsvType.OP;
-        inputStream = Mockito.mock(InputStream.class);
 
         uriComponents = new UriComponents();
     }

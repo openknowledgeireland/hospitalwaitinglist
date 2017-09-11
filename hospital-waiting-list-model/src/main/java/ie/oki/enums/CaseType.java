@@ -19,7 +19,7 @@ public enum CaseType {
         return this.value;
     }
 
-    public static CaseType getEnumByValue(final String input) {
+    public static CaseType getByValue(final String input) {
         if (Utils.isNullOrEmpty(input)) {
             return null;
         }

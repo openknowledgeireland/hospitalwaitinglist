@@ -10,29 +10,29 @@ import static org.junit.Assert.*;
 public class CaseTypeTest {
 
     @Test
-    public void testGetEnumByValue_nullInput() {
-        CaseType result = CaseType.getEnumByValue(null);
+    public void testGetByValue_nullInput() {
+        CaseType result = CaseType.getByValue(null);
 
         assertNull(result);
     }
 
     @Test
-    public void testGetEnumByValue_emptyInput() {
-        CaseType result = CaseType.getEnumByValue("");
+    public void testGetByValue_emptyInput() {
+        CaseType result = CaseType.getByValue("");
 
         assertNull(result);
     }
 
     @Test
-    public void testGetEnumByValue_wrongInput() {
-        CaseType result = CaseType.getEnumByValue("wrong");
+    public void testGetByValue_wrongInput() {
+        CaseType result = CaseType.getByValue("wrong");
 
         assertNull(result);
     }
 
     @Test
-    public void testGetEnumByValue_success() {
-        CaseType result = CaseType.getEnumByValue("day case");
+    public void testGetByValue_success() {
+        CaseType result = CaseType.getByValue("day case");
 
         assertNotNull(result);
         assertEquals(CaseType.DAY_CASE, result);

@@ -2,6 +2,7 @@ package ie.oki.util;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -59,7 +60,15 @@ public final class Utils {
     }
 
     public static Date convertStringToDate(final String input) {
-        return java.sql.Date.valueOf(LocalDate.parse(normalizeAndTrim(input), dateTimeFormatter));
+        if (isNullOrEmpty(input)) {
+            return null;
+        }
+
+        try {
+            return java.sql.Date.valueOf(LocalDate.parse(normalizeAndTrim(input), dateTimeFormatter));
+        } catch (DateTimeParseException dtpe) {
+            return null;
+        }
     }
 
     /**
@@ -82,5 +91,21 @@ public final class Utils {
         }
 
         return input.replace("\"", "").trim();
+    }
+
+    public static boolean isValidLookupParam(final String param) {
+        if (isNullOrEmpty(param)) {
+            return false;
+        }
+
+        return param.matches(INPUT_PARAM_PATTERN);
+    }
+
+    public static boolean isValidUUID(final String input) {
+        if (isNullOrEmpty(input)) {
+            return false;
+        }
+
+        return input.matches(UUID_PATTERN);
     }
 }

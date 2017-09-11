@@ -1,35 +1,31 @@
 package ie.oki.service.impl;
 
-import ie.oki.enums.CaseType;
-import ie.oki.enums.Classification;
 import ie.oki.enums.CsvType;
-import ie.oki.model.Hospital;
-import ie.oki.model.HospitalGroup;
 import ie.oki.model.Record;
-import ie.oki.model.Speciality;
 import ie.oki.repository.HospitalGroupRepository;
 import ie.oki.repository.HospitalRepository;
 import ie.oki.repository.SpecialityRepository;
 import ie.oki.service.CommonService;
 import ie.oki.service.RecordService;
-import ie.oki.util.Utils;
+import ie.oki.util.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.BeanUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 import static org.mockito.Mockito.*;
 
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ProcessFileServiceImplTest {
 
     @Mock
@@ -56,88 +52,37 @@ public class ProcessFileServiceImplTest {
     private InputStream opLineAsStream;
     private InputStream ipdcLineAsStream;
 
-    private String dateAsString;
-    private Date archivedDate;
-    private String groupName;
-    private int hospitalHipe;
-    private String hospitalName;
-    private int specialityHipe;
-    private String specialityName;
-    private CaseType caseType;
-    private Classification classification;
-    private int minimumAge;
-    private int maximumAge;
-    private int minimumWaitingTime;
-    private int maximumWaitingTime;
-    private int waiting;
-
     private Record recordOp;
     private Record recordIpdc;
-    private Hospital hospital;
-    private HospitalGroup hospitalGroup;
-    private Speciality speciality;
+
+    private TestUtil testUtil;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        testUtil = new TestUtil();
 
-        dateAsString = "2017-01-31";
-        archivedDate = Utils.convertStringToDate(dateAsString);
-        groupName = "Children's Hospital Group";
-        hospitalHipe = 940;
-        hospitalName = "Childrens University Hospital Temple Street";
-        specialityHipe = 100;
-        specialityName = "Cardiology";
-        caseType = CaseType.DAY_CASE;
-        classification = Classification.CHILD;
-        minimumAge = 0;
-        maximumAge = 15;
-        minimumWaitingTime = 0;
-        maximumWaitingTime = 3;
-        waiting = 124;
-
-        hospitalGroup = new HospitalGroup();
-        hospitalGroup.setName(groupName);
-
-        hospital = new Hospital();
-        hospital.setHipe(hospitalHipe);
-        hospital.setName(hospitalName);
-        hospital.setGroup(hospitalGroup);
-
-        speciality = new Speciality();
-        speciality.setHipe(specialityHipe);
-        speciality.setName(specialityName);
-
-        recordOp = new Record();
-        recordOp.setArchivedDate(archivedDate);
-        recordOp.setHospital(hospital);
-        recordOp.setSpeciality(speciality);
-        recordOp.setClassification(classification);
-        recordOp.setType(CsvType.OP);
-        recordOp.setMinimumAge(minimumAge);
-        recordOp.setMaximumAge(maximumAge);
-        recordOp.setMinimumWaitingTime(minimumWaitingTime);
-        recordOp.setMaximumWaitingTime(maximumWaitingTime);
-        recordOp.setWaiting(waiting);
-
+        recordOp = testUtil.createRecord();
         recordIpdc = new Record();
 
         BeanUtils.copyProperties(recordOp, recordIpdc);
 
-        recordIpdc.setCaseType(caseType);
+        recordIpdc.setCaseType(testUtil.getCaseType());
         recordIpdc.setType(CsvType.IPDC);
 
         opLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + classification.name() + ", " + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getClassification().name() + ", " + testUtil.getMinimumAge() + "-" + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         opLineAsStream = new ByteArrayInputStream(opLineAsString.getBytes(StandardCharsets.UTF_8));
 
         ipdcLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Case Type,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + caseType.getValue() + "," + classification + "," + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getCaseType().getValue() + "," + testUtil.getClassification() + "," + testUtil.getMinimumAge() + "-"
+            + testUtil.getMaximumAge() + ", " + testUtil.getMinimumWaitingTime() + "-"
+            + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         ipdcLineAsStream = new ByteArrayInputStream(ipdcLineAsString.getBytes(StandardCharsets.UTF_8));
     }
@@ -155,9 +100,10 @@ public class ProcessFileServiceImplTest {
     @Test
     public void testReadOpFile_columnLengthDoesntMatch() {
         opLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + classification.name() + ", " + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months";
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getClassification().name() + ", " + testUtil.getMinimumAge() + "-" + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months";
 
         opLineAsStream = new ByteArrayInputStream(opLineAsString.getBytes(StandardCharsets.UTF_8));
 
@@ -169,22 +115,22 @@ public class ProcessFileServiceImplTest {
 
     @Test
     public void testReadOpFile_lineAlreadyProcessed() {
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(true);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(true);
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verifyNoMoreInteractions(recordService);
         verify(commonService).clearAllCaches();
     }
 
     @Test
     public void testReadOpFile_successfullyProcessed() {
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verify(recordService).save(recordOp);
         verify(commonService).clearAllCaches();
     }
@@ -192,20 +138,21 @@ public class ProcessFileServiceImplTest {
     @Test
     public void testReadOpFile_wronglyFormattedAge() {
         opLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + classification.name() + ", " + "WRONG_AGE" + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getClassification().name() + ", " + "WRONG_AGE" + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         opLineAsStream = new ByteArrayInputStream(opLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
         recordOp.setMinimumAge(null);
         recordOp.setMaximumAge(null);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verify(recordService).save(recordOp);
         verify(commonService).clearAllCaches();
     }
@@ -213,84 +160,86 @@ public class ProcessFileServiceImplTest {
     @Test
     public void testReadOpFile_wronglyFormattedTimeBand() {
         opLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + classification.name() + ", " + minimumAge + "-" + maximumAge + ", "
-            + "WRONG_BAND" + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getClassification().name() + ", " + testUtil.getMinimumAge() + "-" + testUtil.getMaximumAge() + ", "
+            + "WRONG_BAND" + " Months," + testUtil.getWaiting();
 
         opLineAsStream = new ByteArrayInputStream(opLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
         recordOp.setMinimumWaitingTime(null);
         recordOp.setMaximumWaitingTime(null);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verify(recordService).save(recordOp);
         verify(commonService).clearAllCaches();
     }
 
     @Test
     public void testReadOpFile_successfullyProcessed_hospitalFound() {
-        hospital.setName("customName");
+        testUtil.getHospital().setName("customName");
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
-        when(hospitalRepository.findOne(hospitalHipe)).thenReturn(hospital);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
+        when(hospitalRepository.findOne(testUtil.getHospitalHipe())).thenReturn(testUtil.getHospital());
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verify(recordService).save(recordOp);
         verify(commonService).clearAllCaches();
     }
 
     @Test
     public void testReadOpFile_successfullyProcessed_hospitalGroupFound() {
-        hospitalGroup.setName("customGroupName");
+        testUtil.getHospitalGroup().setName("customtestUtil.getGroupName()");
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
-        when(hospitalGroupRepository.findOne(groupName)).thenReturn(hospitalGroup);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
+        when(hospitalGroupRepository.findOne(testUtil.getGroupName())).thenReturn(testUtil.getHospitalGroup());
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verify(recordService).save(recordOp);
         verify(commonService).clearAllCaches();
     }
 
     @Test
     public void testReadOpFile_successfullyProcessed_specialityFound() {
-        speciality.setName("customSpecialityName");
+        testUtil.getSpeciality().setName("customSpecialityName");
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
-        when(specialityRepository.findOne(specialityHipe)).thenReturn(speciality);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
+        when(specialityRepository.findOne(testUtil.getSpecialityHipe())).thenReturn(testUtil.getSpeciality());
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
         verify(recordService).save(recordOp);
         verify(commonService).clearAllCaches();
     }
 
     /**
-     * Since the hospitalHipe is invalid in the incoming message, it will be set as -1 in the record
+     * Since the testUtil.getHospitalHipe() is invalid in the incoming message, it will be set as -1 in the record
      * and that's what we test here.
      */
     @Test
     public void testReadOpFile_successfullyProcessed_invalidHospitalHipe() {
         opLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + "," + "NULL" + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + classification.name() + ", " + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + "," + "NULL" + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getClassification().name() + ", " + testUtil.getMinimumAge() + "-" + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         opLineAsStream = new ByteArrayInputStream(opLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
 
         recordOp.getHospital().setHipe(-1);
 
@@ -299,24 +248,25 @@ public class ProcessFileServiceImplTest {
     }
 
     /**
-     * Since the specialityHipe is invalid in the incoming message, it will be set as 9000 in the record
+     * Since the testUtil.getSpecialityHipe() is invalid in the incoming message, it will be set as 9000 in the record
      * and that's what we test here.
      * The reason it's set to 9000, because for some entries it's set to that value, rather than NULL, so I went with consistency.
      */
     @Test
     public void testReadOpFile_successfullyProcessed_invalidSpecialityHipe() {
         opLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + "," + "NULL" + "," + specialityName + ","
-            + classification.name() + ", " + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName()
+            + "," + "NULL" + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getClassification().name() + ", " + testUtil.getMinimumAge() + "-" + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         opLineAsStream = new ByteArrayInputStream(opLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.OP)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP)).thenReturn(false);
 
         processFileServiceImpl.readFile(opLineAsStream, CsvType.OP);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.OP);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.OP);
 
         recordOp.getSpeciality().setHipe(9000);
 
@@ -327,9 +277,11 @@ public class ProcessFileServiceImplTest {
     @Test
     public void testReadOpIpdcFile_columnLengthDoesntMatch() {
         ipdcLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Case Type,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + caseType.getValue() + "," + classification + "," + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months";
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getCaseType().getValue() + "," + testUtil.getClassification() + "," + testUtil.getMinimumAge() + "-"
+            + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months";
 
         ipdcLineAsStream = new ByteArrayInputStream(ipdcLineAsString.getBytes(StandardCharsets.UTF_8));
 
@@ -341,22 +293,22 @@ public class ProcessFileServiceImplTest {
 
     @Test
     public void testReadIpdcFile_lineAlreadyProcessed() {
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.IPDC)).thenReturn(true);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC)).thenReturn(true);
 
         processFileServiceImpl.readFile(ipdcLineAsStream, CsvType.IPDC);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.IPDC);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC);
         verifyNoMoreInteractions(recordService);
         verify(commonService).clearAllCaches();
     }
 
     @Test
     public void testReadIpdcFile_successfullyProcessed() {
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.IPDC)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC)).thenReturn(false);
 
         processFileServiceImpl.readFile(ipdcLineAsStream, CsvType.IPDC);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.IPDC);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC);
         verify(recordService).save(recordIpdc);
         verify(commonService).clearAllCaches();
     }
@@ -364,20 +316,21 @@ public class ProcessFileServiceImplTest {
     @Test
     public void testReadIpdcFile_wronglyFormattedAge() {
         ipdcLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + caseType.getValue() + "," + classification.name() + ", " + "WRONG_AGE" + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getCaseType().getValue() + "," + testUtil.getClassification().name() + ", " + "WRONG_AGE" + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         ipdcLineAsStream = new ByteArrayInputStream(ipdcLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.IPDC)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC)).thenReturn(false);
 
         processFileServiceImpl.readFile(ipdcLineAsStream, CsvType.IPDC);
 
         recordIpdc.setMinimumAge(null);
         recordIpdc.setMaximumAge(null);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.IPDC);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC);
         verify(recordService).save(recordIpdc);
         verify(commonService).clearAllCaches();
     }
@@ -385,42 +338,46 @@ public class ProcessFileServiceImplTest {
     @Test
     public void testReadIpdcFile_wronglyFormattedTimeBand() {
         ipdcLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + caseType.getValue() + "," + classification.name() + ", " + minimumAge + "-" + maximumAge + ", "
-            + "WRONG_BAND" + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getCaseType().getValue() + "," + testUtil.getClassification().name() + ", " + testUtil.getMinimumAge() + "-"
+            + testUtil.getMaximumAge() + ", "
+            + "WRONG_BAND" + " Months," + testUtil.getWaiting();
 
         ipdcLineAsStream = new ByteArrayInputStream(ipdcLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.IPDC)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC)).thenReturn(false);
 
         processFileServiceImpl.readFile(ipdcLineAsStream, CsvType.IPDC);
 
         recordIpdc.setMinimumWaitingTime(null);
         recordIpdc.setMaximumWaitingTime(null);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.IPDC);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC);
         verify(recordService).save(recordIpdc);
         verify(commonService).clearAllCaches();
     }
 
     /**
-     * Since the hospitalHipe is invalid in the incoming message, it will be set as -1 in the record
+     * Since the testUtil.getHospitalHipe() is invalid in the incoming message, it will be set as -1 in the record
      * and that's what we test here.
      */
     @Test
     public void testReadIpdcFile_successfullyProcessed_invalidHospitalHipe() {
         ipdcLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Case Type,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + "NULL" + "," + hospitalName + ",0" + specialityHipe + "," + specialityName + ","
-            + caseType.getValue() + "," + classification + "," + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + "NULL" + "," + testUtil.getHospitalName() + ",0"
+            + testUtil.getSpecialityHipe() + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getCaseType().getValue() + "," + testUtil.getClassification() + "," + testUtil.getMinimumAge() + "-"
+            + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         ipdcLineAsStream = new ByteArrayInputStream(ipdcLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.IPDC)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC)).thenReturn(false);
 
         processFileServiceImpl.readFile(ipdcLineAsStream, CsvType.IPDC);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.IPDC);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC);
 
         recordIpdc.getHospital().setHipe(-1);
 
@@ -429,24 +386,26 @@ public class ProcessFileServiceImplTest {
     }
 
     /**
-     * Since the specialityHipe is invalid in the incoming message, it will be set as 9000 in the record
+     * Since the testUtil.getSpecialityHipe() is invalid in the incoming message, it will be set as 9000 in the record
      * and that's what we test here.
      * The reason it's set to 9000, because for some entries it's set to that value, rather than NULL, so I went with consistency.
      */
     @Test
     public void testReadIpdcFile_successfullyProcessed_invalidSpecialityHipe() {
         ipdcLineAsString = "Archive Date,Group,Hospital HIPE,Hospital,Specialty HIPE,Speciality,Case Type,Adult/Child,Age Profile,Time Bands,Total\n"
-            + dateAsString + "," + groupName + ",0" + hospitalHipe + "," + hospitalName + ",0" + "NULL" + "," + specialityName + ","
-            + caseType.getValue() + "," + classification + "," + minimumAge + "-" + maximumAge + ", "
-            + minimumWaitingTime + "-" + maximumWaitingTime + " Months," + waiting;
+            + testUtil.getDateAsString() + "," + testUtil.getGroupName() + ",0" + testUtil.getHospitalHipe() + ","
+            + testUtil.getHospitalName() + ",0" + "NULL" + "," + testUtil.getSpecialityName() + ","
+            + testUtil.getCaseType().getValue() + "," + testUtil.getClassification() + "," + testUtil.getMinimumAge() + "-"
+            + testUtil.getMaximumAge() + ", "
+            + testUtil.getMinimumWaitingTime() + "-" + testUtil.getMaximumWaitingTime() + " Months," + testUtil.getWaiting();
 
         ipdcLineAsStream = new ByteArrayInputStream(ipdcLineAsString.getBytes(StandardCharsets.UTF_8));
 
-        when(recordService.isRowAlreadyProcessed(archivedDate, CsvType.IPDC)).thenReturn(false);
+        when(recordService.isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC)).thenReturn(false);
 
         processFileServiceImpl.readFile(ipdcLineAsStream, CsvType.IPDC);
 
-        verify(recordService).isRowAlreadyProcessed(archivedDate, CsvType.IPDC);
+        verify(recordService).isRowAlreadyProcessed(testUtil.getArchivedDate(), CsvType.IPDC);
 
         recordIpdc.getSpeciality().setHipe(9000);
 

@@ -7,34 +7,35 @@ import static org.junit.Assert.*;
 /**
  * @author Zoltan Toth
  */
-public class ClassificationTest {
+public class SearchOperationTest {
 
     @Test
     public void testGetByValue_nullInput() {
-        Classification result = Classification.getByValue(null);
+        SearchOperation result = SearchOperation.getByValue(null);
 
         assertNull(result);
     }
 
     @Test
     public void testGetByValue_emptyInput() {
-        Classification result = Classification.getByValue("");
+        SearchOperation result = SearchOperation.getByValue("");
 
         assertNull(result);
     }
 
     @Test
     public void testGetByValue_wrongInput() {
-        Classification result = Classification.getByValue("wrong");
+        SearchOperation result = SearchOperation.getByValue("sdfdf");
 
         assertNull(result);
     }
 
     @Test
     public void testGetByValue_success() {
-        Classification result = Classification.getByValue("child");
+        SearchOperation result = SearchOperation.getByValue(":");
 
         assertNotNull(result);
-        assertEquals(Classification.CHILD, result);
+        assertEquals(SearchOperation.EQUAL, result);
     }
+
 }

@@ -28,5 +28,5 @@ public class Hospital implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     @ApiModelProperty(value = "Hospital group name")
     @JoinColumn(name = "hospital_group_name", referencedColumnName = "name")
-    private HospitalGroup group;
+    private HospitalGroup hospitalGroup;
 }

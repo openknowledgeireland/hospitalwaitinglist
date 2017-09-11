@@ -1,13 +1,17 @@
 package ie.oki.service.impl;
 
 import ie.oki.enums.CsvType;
+import ie.oki.enums.SearchOperation;
 import ie.oki.model.Record;
+import ie.oki.model.SearchCriteria;
 import ie.oki.repository.RecordRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,12 +19,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class RecordServiceImplTest {
 
     @Mock
@@ -30,26 +34,22 @@ public class RecordServiceImplTest {
     private RecordServiceImpl recordServiceImpl;
 
     private List<Record> records;
-    private String lookupId;
+    private List<SearchCriteria> searchCriteria;
     private Record record;
     private UUID id;
-    private UUID id2;
     private Date archivedDate;
-    private int hipe;
     private CsvType type;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         records = new ArrayList<>();
+        searchCriteria = new ArrayList<>();
 
-        lookupId = UUID.randomUUID().toString();
+        searchCriteria.add(new SearchCriteria("key", SearchOperation.EQUAL, "value"));
+
         record = new Record();
         id = UUID.randomUUID();
-        id2 = UUID.randomUUID();
         archivedDate = new Date();
-        hipe = 100;
         type = CsvType.OP;
 
         record.setId(id);
@@ -58,133 +58,19 @@ public class RecordServiceImplTest {
         records.add(record);
     }
 
+    //TODO This test doesn't do much
     @Test
-    public void testFindById_success() {
-        when(recordRepository.findOne(UUID.fromString(lookupId))).thenReturn(record);
+    @SuppressWarnings("unchecked")
+    public void testFindByCriteriaList() {
+        when(recordRepository.findAll(any(Specification.class))).thenReturn(new ArrayList<>());
 
-        Record result = recordServiceImpl.findById(lookupId);
+        List<Record> result = recordServiceImpl.findByCriteriaList(searchCriteria);
+
+        verify(recordRepository).findAll(any(Specification.class));
+        verifyNoMoreInteractions(recordRepository);
 
         assertNotNull(result);
-        assertEquals(id, result.getId());
-        assertEquals(archivedDate, result.getArchivedDate());
-
-        verify(recordRepository).findOne(UUID.fromString(lookupId));
-    }
-
-    @Test
-    public void testFindById_noResult() {
-        when(recordRepository.findOne(UUID.fromString(lookupId))).thenReturn(null);
-
-        Record result = recordServiceImpl.findById(lookupId);
-
-        assertNull(result);
-
-        verify(recordRepository).findOne(UUID.fromString(lookupId));
-    }
-
-    @Test
-    public void testFindById_wrongInputParameter() {
-        String idInWrongFormat = "test";
-
-        Record result = recordServiceImpl.findById(idInWrongFormat);
-
-        assertNull(result);
-    }
-
-    @Test
-    public void testFindByHospitalHipe_oneResult() {
-        when(recordRepository.findByHospitalHipe(hipe)).thenReturn(records);
-
-        List<Record> result = recordServiceImpl.findByHospitalHipe(hipe);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(id, result.get(0).getId());
-        assertEquals(archivedDate, result.get(0).getArchivedDate());
-
-        verify(recordRepository).findByHospitalHipe(hipe);
-    }
-
-    @Test
-    public void testFindByHospitalHipe_twoResults() {
-        record = new Record();
-        record.setId(id2);
-
-        records.add(record);
-
-        when(recordRepository.findByHospitalHipe(hipe)).thenReturn(records);
-
-        List<Record> result = recordServiceImpl.findByHospitalHipe(hipe);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(id, result.get(0).getId());
-        assertEquals(archivedDate, result.get(0).getArchivedDate());
-        assertEquals(id2, result.get(1).getId());
-
-        verify(recordRepository).findByHospitalHipe(hipe);
-    }
-
-    @Test
-    public void testFindByHospitalHipe_noResult() {
-        records = new ArrayList<>();
-
-        when(recordRepository.findByHospitalHipe(hipe)).thenReturn(records);
-
-        List<Record> result = recordServiceImpl.findByHospitalHipe(hipe);
-
-        assertNotNull(result);
-        assertEquals(0, result.size());
-
-        verify(recordRepository).findByHospitalHipe(hipe);
-    }
-
-    @Test
-    public void testFindBySpecialityHipe_oneResult() {
-        when(recordRepository.findBySpecialityHipe(hipe)).thenReturn(records);
-
-        List<Record> result = recordServiceImpl.findBySpecialityHipe(hipe);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(id, result.get(0).getId());
-        assertEquals(archivedDate, result.get(0).getArchivedDate());
-
-        verify(recordRepository).findBySpecialityHipe(hipe);
-    }
-
-    @Test
-    public void testFindBySpecialityHipe_twoResults() {
-        record = new Record();
-        record.setId(id2);
-
-        records.add(record);
-
-        when(recordRepository.findBySpecialityHipe(hipe)).thenReturn(records);
-
-        List<Record> result = recordServiceImpl.findBySpecialityHipe(hipe);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(id, result.get(0).getId());
-        assertEquals(archivedDate, result.get(0).getArchivedDate());
-        assertEquals(id2, result.get(1).getId());
-
-        verify(recordRepository).findBySpecialityHipe(hipe);
-    }
-
-    @Test
-    public void testFindBySpecialityHipe_noResult() {
-        records = new ArrayList<>();
-
-        when(recordRepository.findBySpecialityHipe(hipe)).thenReturn(records);
-
-        List<Record> result = recordServiceImpl.findBySpecialityHipe(hipe);
-
-        assertNotNull(result);
-        assertEquals(0, result.size());
-
-        verify(recordRepository).findBySpecialityHipe(hipe);
+        assertTrue(result.isEmpty());
     }
 
     @Test

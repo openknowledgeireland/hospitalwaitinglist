@@ -5,12 +5,11 @@ import ie.oki.model.UriComponents;
 import ie.oki.service.CommonService;
 import ie.oki.service.DownloadService;
 import ie.oki.service.ProcessFileService;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.InputStream;
 import java.time.Year;
@@ -20,6 +19,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AutoDownloadServiceImplTest {
 
     @Mock
@@ -34,16 +34,11 @@ public class AutoDownloadServiceImplTest {
     @InjectMocks
     private AutoDownloadServiceImpl autoDownloadServiceImpl;
 
+    @Mock
     private UriComponents uriComponents;
+
+    @Mock
     private InputStream inputStream;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-
-        uriComponents = Mockito.mock(UriComponents.class);
-        inputStream = Mockito.mock(InputStream.class);
-    }
 
     @Test
     public void testCheckFiles_success() {

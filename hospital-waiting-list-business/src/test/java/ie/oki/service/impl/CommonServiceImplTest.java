@@ -6,10 +6,10 @@ import ie.oki.properties.AppProperties;
 import ie.oki.util.Constants;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CommonServiceImplTest {
 
     @Mock
@@ -36,9 +37,12 @@ public class CommonServiceImplTest {
     @InjectMocks
     private CommonServiceImpl commonServiceImpl;
 
+    @Mock
     private List<String> mockCacheNames;
     private List<String> realCacheNames;
     private String cacheName;
+
+    @Mock
     private Cache cache;
 
     private String baseUrl;
@@ -49,12 +53,8 @@ public class CommonServiceImplTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
-        cache = Mockito.mock(Cache.class);
         cacheName = "cacheName";
 
-        mockCacheNames = Mockito.mock(List.class);
         realCacheNames = new ArrayList<>();
 
         realCacheNames.add(cacheName);

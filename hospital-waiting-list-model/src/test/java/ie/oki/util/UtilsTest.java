@@ -2,7 +2,6 @@ package ie.oki.util;
 
 import org.junit.Test;
 
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -133,14 +132,18 @@ public class UtilsTest {
         assertEquals(1, calendar.get(Calendar.DAY_OF_MONTH));
     }
 
-    @Test(expected = DateTimeParseException.class)
+    @Test
     public void testConvertStringToDate_emptyInput() {
-        Utils.convertStringToDate("");
+        Date result = Utils.convertStringToDate("");
+
+        assertNull(result);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testConvertStringToDate_nullInput() {
-        Utils.convertStringToDate(null);
+        Date result = Utils.convertStringToDate(null);
+
+        assertNull(result);
     }
 
     @Test
@@ -215,5 +218,82 @@ public class UtilsTest {
 
         assertNotNull(result);
         assertEquals("test", result);
+    }
+
+    @Test
+    public void testIsValidLookupParam_nullInput() {
+        boolean result = Utils.isValidLookupParam(null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidLookupParam_blankInput() {
+        boolean result = Utils.isValidLookupParam("");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidLookupParam_missingThirdPart() {
+        boolean result = Utils.isValidLookupParam("fhgkd<");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidLookupParam_wrongInput() {
+        boolean result = Utils.isValidLookupParam("fhgkd<:df dfgoi4p");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidLookupParam_success() {
+        boolean result = Utils.isValidLookupParam("fhgkd<df dfgoi4p");
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsValidLookupParam_correctPath() {
+        boolean result = Utils.isValidLookupParam("hospital.hospitalGroup.name:df dfgoi4p");
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsValidUUID_nullInput() {
+        boolean result = Utils.isValidUUID(null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidUUID_blankInput() {
+        boolean result = Utils.isValidUUID("");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidUUID_wrongInput1() {
+        boolean result = Utils.isValidUUID("sddsfdsf-dfg3-dfg-5fdg-d");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidUUID_wrongInput2() {
+        boolean result = Utils.isValidUUID("abcdef12-dfg3-dfg5-5fdg-abcdef123456");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsValidUUID_success() {
+        boolean result = Utils.isValidUUID("abcdef12-dfe3-dfe5-5fde-abcdef123456");
+
+        assertTrue(result);
     }
 }

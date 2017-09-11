@@ -33,9 +33,23 @@ subprojects {
         sourceSets = [sourceSets.main]
     }
 
+    tasks.withType(Checkstyle) {
+        reports {
+            xml.enabled = true
+            xml.destination file("${buildDir}/reports/checkstyle/checkstyle-report.xml")
+        }
+    }
+
     pmd {
         ruleSetFiles = files("$rootDir/config/pmd-ruleset.xml")
         sourceSets = [sourceSets.main]
+    }
+
+    tasks.withType(Pmd) {
+        reports {
+            xml.enabled = true
+            xml.destination file("${buildDir}/reports/pmd/pmd-report.xml")
+        }
     }
 
     findbugs {
@@ -46,15 +60,15 @@ subprojects {
 
     tasks.withType(FindBugs) {
         reports {
-            xml.enabled = false
-            html.enabled = true
+            xml.enabled = true
+            xml.destination file("${buildDir}/reports/findbugs/findbugs-report.xml")
         }
     }
 
     jacocoTestReport {
         reports {
             xml.enabled = true
-            xml.destination file("${buildDir}/reports/jacoco/xml/report.xml")
+            xml.destination file("${buildDir}/reports/jacoco/xml/jacoco-report.xml")
             html.enabled = true
             html.destination file("${buildDir}/reports/jacoco/html")
         }
@@ -76,11 +90,24 @@ subprojects {
         testCompile("org.easymock:easymock:3.4")
         testCompile("org.powermock:powermock-api-mockito:1.6.6")
         testCompile("org.powermock:powermock-module-junit4:1.6.6")
+        testCompile("org.springframework.boot:spring-boot-starter-test")
     }
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = "4.1"
+}
+
+def exportedProjects = [
+    ":hospital-waiting-list-model",
+    ":hospital-waiting-list-business",
+    ":hospital-waiting-list-web"
+]
+
+task alljavadoc(type: Javadoc) {
+    source exportedProjects.collect { project(it).sourceSets.main.allJava }
+    classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+    destinationDir = file("${buildDir}/docs/javadoc")
 }
 
 task codeCoverageReport(type: JacocoReport) {

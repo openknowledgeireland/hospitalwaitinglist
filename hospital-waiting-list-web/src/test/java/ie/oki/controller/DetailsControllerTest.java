@@ -3,19 +3,18 @@ package ie.oki.controller;
 import ie.oki.enums.CaseType;
 import ie.oki.enums.Classification;
 import ie.oki.enums.CsvType;
-import ie.oki.model.Hospital;
-import ie.oki.model.HospitalGroup;
-import ie.oki.model.Record;
-import ie.oki.model.Speciality;
+import ie.oki.enums.SearchOperation;
+import ie.oki.model.*;
 import ie.oki.service.HospitalService;
 import ie.oki.service.RecordService;
 import ie.oki.service.SpecialityService;
 import ie.oki.util.Constants;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,8 +24,7 @@ import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -34,6 +32,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DetailsControllerTest {
 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT)
@@ -54,6 +53,7 @@ public class DetailsControllerTest {
 
     private MockMvc mockMvc;
 
+    private List<Record> records;
     private HospitalGroup hospitalGroup;
     private String hospitalGroupName;
 
@@ -82,8 +82,9 @@ public class DetailsControllerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mockMvc = standaloneSetup(detailsController).build();
+
+        records = new ArrayList<>();
 
         hospitalGroupName = "hospitalGroupName";
 
@@ -96,7 +97,7 @@ public class DetailsControllerTest {
         hospital = new Hospital();
         hospital.setName(hospitalName);
         hospital.setHipe(hospitalHipe);
-        hospital.setGroup(hospitalGroup);
+        hospital.setHospitalGroup(hospitalGroup);
 
         specialityHipe = 5864;
         specialityName = "specialityName";
@@ -134,116 +135,35 @@ public class DetailsControllerTest {
 
         record2 = new Record();
         record2.setId(record2Id);
+
+        records.add(record);
+        records.add(record2);
     }
 
     @Test
-    public void testRecords_noInputParameter() throws Exception {
+    public void testRecords_noParameter() throws Exception {
 
         mockMvc.perform(get("/records").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testRecords_wrongParameter() throws Exception {
+
+        mockMvc.perform(get("/records?params=key::value").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
-    public void testRecords_lookupByIdEmptyResult() throws Exception {
+    public void testRecords_correctParameter() throws Exception {
+        List<SearchCriteria> criteria = new ArrayList<>();
+        criteria.add(new SearchCriteria("key", SearchOperation.EQUAL, "value"));
 
-        when(recordService.findById(recordId.toString())).thenReturn(null);
+        when(recordService.findByCriteriaList(criteria)).thenReturn(records);
 
-        mockMvc.perform(get("/records?id=" + recordId).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(0)));
-
-        verify(recordService).findById(recordId.toString());
-    }
-
-    @Test
-    public void testRecords_lookupByIdOneResult() throws Exception {
-
-        when(recordService.findById(recordId.toString())).thenReturn(record);
-
-        mockMvc.perform(get("/records?id=" + recordId).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].id", is(recordId.toString())))
-            .andExpect(jsonPath("$[0].archivedDate", is(dateTimeFormatter.format(archivedDate.toInstant()))))
-            .andExpect(jsonPath("$[0].caseType", is(caseType.name())))
-            .andExpect(jsonPath("$[0].classification", is(classification.name())))
-            .andExpect(jsonPath("$[0].hospital.hipe", is(hospitalHipe)))
-            .andExpect(jsonPath("$[0].hospital.name", is(hospitalName)))
-            .andExpect(jsonPath("$[0].hospital.group.name", is(hospitalGroupName)))
-            .andExpect(jsonPath("$[0].minimumAge", is(minimumAge)))
-            .andExpect(jsonPath("$[0].maximumAge", is(maximumAge)))
-            .andExpect(jsonPath("$[0].minimumWaitingTime", is(minimumWaitingTime)))
-            .andExpect(jsonPath("$[0].maximumWaitingTime", is(maximumWaitingTime)))
-            .andExpect(jsonPath("$[0].speciality.hipe", is(specialityHipe)))
-            .andExpect(jsonPath("$[0].speciality.name", is(specialityName)))
-            .andExpect(jsonPath("$[0].type", is(csvType.name())))
-            .andExpect(jsonPath("$[0].waiting", is(waiting)));
-
-        verify(recordService).findById(recordId.toString());
-    }
-
-    @Test
-    public void testRecords_lookupByHospitalHipeEmptyResult() throws Exception {
-
-        List<Record> expectedResult = new ArrayList<>();
-
-        when(recordService.findByHospitalHipe(hospitalHipe)).thenReturn(expectedResult);
-
-        mockMvc.perform(get("/records?hospitalHipe=" + hospitalHipe).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(0)));
-
-        verify(recordService).findByHospitalHipe(hospitalHipe);
-    }
-
-    @Test
-    public void testRecords_lookupByHospitalHipeOneResult() throws Exception {
-
-        List<Record> expectedResult = new ArrayList<>();
-
-        expectedResult.add(record);
-
-        when(recordService.findByHospitalHipe(hospitalHipe)).thenReturn(expectedResult);
-
-        mockMvc.perform(get("/records?hospitalHipe=" + hospitalHipe).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].id", is(recordId.toString())))
-            .andExpect(jsonPath("$[0].archivedDate", is(dateTimeFormatter.format(archivedDate.toInstant()))))
-            .andExpect(jsonPath("$[0].caseType", is(caseType.name())))
-            .andExpect(jsonPath("$[0].classification", is(classification.name())))
-            .andExpect(jsonPath("$[0].hospital.hipe", is(hospitalHipe)))
-            .andExpect(jsonPath("$[0].hospital.name", is(hospitalName)))
-            .andExpect(jsonPath("$[0].hospital.group.name", is(hospitalGroupName)))
-            .andExpect(jsonPath("$[0].minimumAge", is(minimumAge)))
-            .andExpect(jsonPath("$[0].maximumAge", is(maximumAge)))
-            .andExpect(jsonPath("$[0].minimumWaitingTime", is(minimumWaitingTime)))
-            .andExpect(jsonPath("$[0].maximumWaitingTime", is(maximumWaitingTime)))
-            .andExpect(jsonPath("$[0].speciality.hipe", is(specialityHipe)))
-            .andExpect(jsonPath("$[0].speciality.name", is(specialityName)))
-            .andExpect(jsonPath("$[0].type", is(csvType.name())))
-            .andExpect(jsonPath("$[0].waiting", is(waiting)));
-
-        verify(recordService).findByHospitalHipe(hospitalHipe);
-    }
-
-    @Test
-    public void testRecords_lookupByHospitalHipeTwoResults() throws Exception {
-
-        List<Record> expectedResult = new ArrayList<>();
-
-        expectedResult.add(record);
-        expectedResult.add(record2);
-
-        when(recordService.findByHospitalHipe(hospitalHipe)).thenReturn(expectedResult);
-
-        mockMvc.perform(get("/records?hospitalHipe=" + hospitalHipe).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/records?params=key:value").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("$", hasSize(2)))
@@ -253,55 +173,7 @@ public class DetailsControllerTest {
             .andExpect(jsonPath("$[0].classification", is(classification.name())))
             .andExpect(jsonPath("$[0].hospital.hipe", is(hospitalHipe)))
             .andExpect(jsonPath("$[0].hospital.name", is(hospitalName)))
-            .andExpect(jsonPath("$[0].hospital.group.name", is(hospitalGroupName)))
-            .andExpect(jsonPath("$[0].minimumAge", is(minimumAge)))
-            .andExpect(jsonPath("$[0].maximumAge", is(maximumAge)))
-            .andExpect(jsonPath("$[0].minimumWaitingTime", is(minimumWaitingTime)))
-            .andExpect(jsonPath("$[0].maximumWaitingTime", is(maximumWaitingTime)))
-            .andExpect(jsonPath("$[0].speciality.hipe", is(specialityHipe)))
-            .andExpect(jsonPath("$[0].speciality.name", is(specialityName)))
-            .andExpect(jsonPath("$[0].type", is(csvType.name())))
-            .andExpect(jsonPath("$[0].waiting", is(waiting)))
-            .andExpect(jsonPath("$[1].id", is(record2Id.toString())));
-
-        verify(recordService).findByHospitalHipe(hospitalHipe);
-    }
-
-    @Test
-    public void testRecords_lookupBySpecialityHipeEmptyResult() throws Exception {
-
-        List<Record> expectedResult = new ArrayList<>();
-
-        when(recordService.findBySpecialityHipe(specialityHipe)).thenReturn(expectedResult);
-
-        mockMvc.perform(get("/records?specialityHipe=" + specialityHipe).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(0)));
-
-        verify(recordService).findBySpecialityHipe(specialityHipe);
-    }
-
-    @Test
-    public void testRecords_lookupBySpecialityHipeOneResult() throws Exception {
-
-        List<Record> expectedResult = new ArrayList<>();
-
-        expectedResult.add(record);
-
-        when(recordService.findBySpecialityHipe(specialityHipe)).thenReturn(expectedResult);
-
-        mockMvc.perform(get("/records?specialityHipe=" + specialityHipe).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].id", is(recordId.toString())))
-            .andExpect(jsonPath("$[0].archivedDate", is(dateTimeFormatter.format(archivedDate.toInstant()))))
-            .andExpect(jsonPath("$[0].caseType", is(caseType.name())))
-            .andExpect(jsonPath("$[0].classification", is(classification.name())))
-            .andExpect(jsonPath("$[0].hospital.hipe", is(hospitalHipe)))
-            .andExpect(jsonPath("$[0].hospital.name", is(hospitalName)))
-            .andExpect(jsonPath("$[0].hospital.group.name", is(hospitalGroupName)))
+            .andExpect(jsonPath("$[0].hospital.hospitalGroup.name", is(hospitalGroupName)))
             .andExpect(jsonPath("$[0].minimumAge", is(minimumAge)))
             .andExpect(jsonPath("$[0].maximumAge", is(maximumAge)))
             .andExpect(jsonPath("$[0].minimumWaitingTime", is(minimumWaitingTime)))
@@ -311,41 +183,8 @@ public class DetailsControllerTest {
             .andExpect(jsonPath("$[0].type", is(csvType.name())))
             .andExpect(jsonPath("$[0].waiting", is(waiting)));
 
-        verify(recordService).findBySpecialityHipe(specialityHipe);
-    }
-
-    @Test
-    public void testRecords_lookupBySpecialityHipeTwoResults() throws Exception {
-
-        List<Record> expectedResult = new ArrayList<>();
-
-        expectedResult.add(record);
-        expectedResult.add(record2);
-
-        when(recordService.findBySpecialityHipe(specialityHipe)).thenReturn(expectedResult);
-
-        mockMvc.perform(get("/records?specialityHipe=" + specialityHipe).contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[0].id", is(recordId.toString())))
-            .andExpect(jsonPath("$[0].archivedDate", is(dateTimeFormatter.format(archivedDate.toInstant()))))
-            .andExpect(jsonPath("$[0].caseType", is(caseType.name())))
-            .andExpect(jsonPath("$[0].classification", is(classification.name())))
-            .andExpect(jsonPath("$[0].hospital.hipe", is(hospitalHipe)))
-            .andExpect(jsonPath("$[0].hospital.name", is(hospitalName)))
-            .andExpect(jsonPath("$[0].hospital.group.name", is(hospitalGroupName)))
-            .andExpect(jsonPath("$[0].minimumAge", is(minimumAge)))
-            .andExpect(jsonPath("$[0].maximumAge", is(maximumAge)))
-            .andExpect(jsonPath("$[0].minimumWaitingTime", is(minimumWaitingTime)))
-            .andExpect(jsonPath("$[0].maximumWaitingTime", is(maximumWaitingTime)))
-            .andExpect(jsonPath("$[0].speciality.hipe", is(specialityHipe)))
-            .andExpect(jsonPath("$[0].speciality.name", is(specialityName)))
-            .andExpect(jsonPath("$[0].type", is(csvType.name())))
-            .andExpect(jsonPath("$[0].waiting", is(waiting)))
-            .andExpect(jsonPath("$[1].id", is(record2Id.toString())));
-
-        verify(recordService).findBySpecialityHipe(specialityHipe);
+        verify(recordService).findByCriteriaList(criteria);
+        verifyNoMoreInteractions(recordService);
     }
 
     @Test
@@ -377,7 +216,7 @@ public class DetailsControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].name", is(hospitalName)))
-            .andExpect(jsonPath("$[0].group.name", is(hospitalGroupName)))
+            .andExpect(jsonPath("$[0].hospitalGroup.name", is(hospitalGroupName)))
             .andExpect(jsonPath("$[0].hipe", is(hospitalHipe)));
 
         verify(hospitalService).findAll();

@@ -99,7 +99,7 @@ public class ProcessFileServiceImpl implements ProcessFileService {
         record.setHospital(processHospital(csvRow));
         record.setSpeciality(processSpeciality(csvRow));
 
-        record.setClassification(Classification.getEnum(csvRow.get(6)));
+        record.setClassification(Classification.getByValue(csvRow.get(6)));
 
         List<Integer> ages = Utils.parseInterval(csvRow.get(7));
         if (!ages.isEmpty()) {
@@ -146,8 +146,8 @@ public class ProcessFileServiceImpl implements ProcessFileService {
         record.setHospital(processHospital(csvRow));
         record.setSpeciality(processSpeciality(csvRow));
 
-        record.setCaseType(CaseType.getEnumByValue(csvRow.get(6)));
-        record.setClassification(Classification.getEnum(csvRow.get(7)));
+        record.setCaseType(CaseType.getByValue(csvRow.get(6)));
+        record.setClassification(Classification.getByValue(csvRow.get(7)));
 
         List<Integer> ages = Utils.parseInterval(csvRow.get(8));
         if (!ages.isEmpty()) {
@@ -192,7 +192,7 @@ public class ProcessFileServiceImpl implements ProcessFileService {
             hospital.setHipe(hospitalHipe);
             hospital.setName(csvRow.get(3));
 
-            hospital.setGroup(hospitalGroup);
+            hospital.setHospitalGroup(hospitalGroup);
         }
 
         return hospital;

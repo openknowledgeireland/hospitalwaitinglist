@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import ie.oki.enums.CaseType;
 import ie.oki.enums.Classification;
 import ie.oki.enums.CsvType;
-import ie.oki.util.Constants;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -12,6 +11,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
+
+import static ie.oki.util.Constants.DATE_FORMAT;
+import static ie.oki.util.Constants.DUBLIN_TIMEZONE;
 
 /**
  * It represents a CSV row.
@@ -39,7 +41,7 @@ public class Record implements Serializable {
     @Temporal(TemporalType.DATE)
     @Column(name = "archived_date")
     @ApiModelProperty(value = "Archive date")
-    @JsonFormat(pattern = Constants.DATE_FORMAT)
+    @JsonFormat(pattern = DATE_FORMAT, timezone = DUBLIN_TIMEZONE)
     private Date archivedDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -57,6 +59,7 @@ public class Record implements Serializable {
     private CaseType caseType;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private Classification classification;
 
     @Column

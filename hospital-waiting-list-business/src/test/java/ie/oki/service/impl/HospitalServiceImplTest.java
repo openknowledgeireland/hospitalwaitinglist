@@ -4,9 +4,10 @@ import ie.oki.model.Hospital;
 import ie.oki.repository.HospitalRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Zoltan Toth
  */
+@RunWith(MockitoJUnitRunner.class)
 public class HospitalServiceImplTest {
 
     @Mock
@@ -36,8 +38,6 @@ public class HospitalServiceImplTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         hospitals = new ArrayList<>();
         hospital = new Hospital();
 

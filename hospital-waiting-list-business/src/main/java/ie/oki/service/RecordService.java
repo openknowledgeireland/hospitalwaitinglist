@@ -2,6 +2,7 @@ package ie.oki.service;
 
 import ie.oki.enums.CsvType;
 import ie.oki.model.Record;
+import ie.oki.model.SearchCriteria;
 
 import java.util.Date;
 import java.util.List;
@@ -11,23 +12,13 @@ import java.util.List;
  */
 public interface RecordService {
 
-    Record findById(final String id);
-
     /**
-     * Looks up the records by the hospital hipe number.
+     * Looks up the records by the search criteria.
      *
-     * @param hipe hospital hipe number
-     * @return records that match
+     * @param criteriaList list of {@link SearchCriteria}
+     * @return list of {@link Record}
      */
-    List<Record> findByHospitalHipe(final int hipe);
-
-    /**
-     * Looks up the records by the speciality hipe number.
-     *
-     * @param hipe speciality hipe number
-     * @return records that match
-     */
-    List<Record> findBySpecialityHipe(final int hipe);
+    List<Record> findByCriteriaList(List<SearchCriteria> criteriaList);
 
     /**
      * Checks if the row with the specified input parameters already exists.

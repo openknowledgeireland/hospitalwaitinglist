@@ -1,12 +1,13 @@
 package ie.oki.controller;
 
+import ie.oki.enums.SearchOperation;
 import ie.oki.model.Hospital;
 import ie.oki.model.Record;
+import ie.oki.model.SearchCriteria;
 import ie.oki.model.Speciality;
 import ie.oki.service.HospitalService;
 import ie.oki.service.RecordService;
 import ie.oki.service.SpecialityService;
-import ie.oki.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,8 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static ie.oki.util.Constants.INPUT_PARAM_PATTERN;
+import static ie.oki.util.Utils.isValidLookupParam;
 
 /**
  * @author Zoltan Toth
@@ -35,33 +41,70 @@ public class DetailsController {
 
     /**
      * Retrieves the records based on the input parameters.
-     * Currently the evaluation order of the parameters is the following: id > hospitalHipe > specialityHipe
-     * Which means that if all three of them are provided, only one record with the same id as specified will return.
      *
-     * @param id the id of the record
-     * @param hospitalHipe the hospital hipe of the records
-     * @param specialityHipe the speciality hipe of the records
-     * @return list of records
+     * <p>The structure of one parameter is the following: <br>
+     * The <b>first</b> part is the path to a certain field, which is based on the structure of the {@link Record} object (example below). <br>
+     * The <b>second</b> part can be:
+     * </p>
+     * <pre>
+     *  ":" when checking for equality
+     *  "&lt;" when the field retrieved by the path has to be <b>less</b> than the value provided
+     *  "&gt;" when the field retrieved by the path has to be <b>greater</b> than the value provided
+     * </pre>
+     *
+     * <p>The <b>third</b> part is the value that will be compared against the field that's retrieved by the path.</p>
+     *
+     * <p>The parameters should be provided in a certain pattern.<br>
+     * When you want to lookup a record by id:
+     * </p>
+     * <pre>
+     *  /records?param=id:abcdefg
+     * </pre>
+     *
+     * <p>When you want to lookup a record where the minimumAge is at least 16:</p>
+     * <pre>
+     *  /records?param=minimumAge&gt;15
+     * </pre>
+     *
+     * <p>When you want to lookup a record where the maximumAge is less than 64:</p>
+     * <pre>
+     *  /records?param=maximumAge&lt;65
+     * </pre>
+     *
+     * <p>When you want to lookup a record by the name of the hospital group:</p>
+     * <pre>
+     *  /records?param=hospital.hospitalGroup.name:hospital group name
+     * </pre>
+     * <p>Multiple parameters can be provided at the same time to fine tune the query.</p>
+     * <pre>
+     *  /records?param=minimumAge&gt;15&amp;param=maximumAge&lt;65&amp;classification:child
+     * </pre>
+     *
+     * @param params a list of parameters to create a query
+     * @return list of records if all the parameters were successfully parsed, otherwise an empty list
      */
     @GetMapping("/records")
     @ApiOperation(value = "Retrieves the records", produces = MediaType.APPLICATION_JSON_UTF8_VALUE,
-        notes = "The evaluation order of the parameters is the following: id > hospitalHipe > specialityHipe")
-    public List<Record> records(
-        @RequestParam(value = "id", required = false) String id,
-        @RequestParam(value = "hospitalHipe", required = false) Integer hospitalHipe,
-        @RequestParam(value = "specialityHipe", required = false) Integer specialityHipe) {
-
+        notes = "Please check the source code for more information.")
+    public List<Record> records(@RequestParam(value = "params") List<String> params) {
         List<Record> records = new ArrayList<>();
+        List<SearchCriteria> searchCriteria = new LinkedList<>();
 
-        if (!Utils.isNullOrEmpty(id)) {
-            records.add(recordService.findById(id));
-        } else if (hospitalHipe != null) {
-            records.addAll(recordService.findByHospitalHipe(hospitalHipe));
-        } else if (specialityHipe != null) {
-            records.addAll(recordService.findBySpecialityHipe(specialityHipe));
+        Pattern pattern = Pattern.compile(INPUT_PARAM_PATTERN);
+
+        for (String param : params) {
+            if (isValidLookupParam(param)) {
+                Matcher matcher = pattern.matcher(param);
+                while (matcher.find()) {
+                    searchCriteria.add(new SearchCriteria(matcher.group(1), SearchOperation.getByValue(matcher.group(2)), matcher.group(3)));
+                }
+            }
         }
 
-        records.removeIf(Objects::isNull);
+        if (!searchCriteria.isEmpty()) {
+            records.addAll(recordService.findByCriteriaList(searchCriteria));
+        }
+
         return records;
     }
 

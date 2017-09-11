@@ -11,7 +11,7 @@ public enum Classification {
     CHILD,
     ADULT;
 
-    public static Classification getEnum(final String input) {
+    public static Classification getByValue(final String input) {
         if (Utils.isNullOrEmpty(input)) {
             return null;
         }
