@@ -1,0 +1,10 @@
+ie.oki.config
+ie.oki.controller
+ie.oki.enums
+ie.oki.model
+ie.oki.predicate
+ie.oki.properties
+ie.oki.repository
+ie.oki.service
+ie.oki.service.impl
+ie.oki.util
