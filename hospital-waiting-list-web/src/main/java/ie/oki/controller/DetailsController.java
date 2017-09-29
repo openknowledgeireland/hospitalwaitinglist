@@ -43,7 +43,7 @@ public class DetailsController {
      * Retrieves the records based on the input parameters.
      *
      * <p>The structure of one parameter is the following: <br>
-     * The <b>first</b> part is the path to a certain field, which is based on the structure of the {@link Record} object (example below). <br>
+     * The <b>first</b> part is the path to a certain field, which is based on the structure of the {@link Record} object (examples below). <br>
      * The <b>second</b> part can be:
      * </p>
      * <pre>
@@ -75,9 +75,15 @@ public class DetailsController {
      * <pre>
      *  /records?param=hospital.hospitalGroup.name:hospital group name
      * </pre>
+     *
+     * <p>Or when you want to lookup a record by the hospital HIPE code:</p>
+     * <pre>
+     *  /records?param=hospital.hipe:1234
+     * </pre>
+     *
      * <p>Multiple parameters can be provided at the same time to fine tune the query.</p>
      * <pre>
-     *  /records?param=minimumAge&gt;15&amp;param=maximumAge&lt;65&amp;classification:child
+     *  /records?param=minimumAge&gt;15&amp;param=maximumAge&lt;65&amp;classification:child&amp;hospital.hipe:1234
      * </pre>
      *
      * @param params a list of parameters to create a query
@@ -85,7 +91,7 @@ public class DetailsController {
      */
     @GetMapping("/records")
     @ApiOperation(value = "Retrieves the records", produces = MediaType.APPLICATION_JSON_UTF8_VALUE,
-        notes = "Please check the source code for more information.")
+        notes = "Please check the source code/javadoc for more information.")
     public List<Record> records(@RequestParam(value = "params") List<String> params) {
         List<Record> records = new ArrayList<>();
         List<SearchCriteria> searchCriteria = new LinkedList<>();
