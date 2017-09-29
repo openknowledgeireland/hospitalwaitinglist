@@ -47,8 +47,14 @@ That will start up the application and create the necessary tables in the previo
 
 You can either check out the controllers, or once the application is up and running, you can navigate to <your-root-url>/hospital-waiting-list/swagger-ui.html where you can find all the endpoints and information about them.
 
+There are some examples about how to lookup and fine tune your queries in the [DetailsController JavaDoc](https://openknowledgeireland.github.io/hospitalwaitinglist/ie/oki/controller/DetailsController.html).
+
 ### Code coverage ###
 
 To check the code coverage run the command: `gradlew test jacocoTestReport` or if you already ran the tests, then the `test` can be left out from the command.
 
 You can find the html output file in `${buildDir}/reports/jacoco/html/index.html` and the xml file in `${buildDir}/reports/jacoco/xml/resport.xml` for each projects.
+
+### Generating JavaDoc ###
+
+Go to the folder of the root project and run the command: `gradlew alljavadoc`. This will generate the JavaDoc for all the subprojects into the `docs` folder in the root.
